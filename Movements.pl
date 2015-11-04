@@ -40,7 +40,7 @@ createPecas(4,
 verificaListaTemEmpty([]) :- fail.
 verificaListaTemEmpty([H | T]) :-
 	( H == 'e' -> true;
-		!, write('skipping...'), verificaListaTemEmpty(T) )
+		!, verificaListaTemEmpty(T) )
 	.
 
 testGetCell(P, L, I) :-
@@ -63,9 +63,8 @@ getCell(P, L, I, Board) :-
 
 	nth0(L,Board,Linha),
 	nth0(I,Linha, Temp),
-	P = Temp
-	%write(P), nl.
-	.
+	P = Temp,
+	write(P), nl.
 printCell(L, I, Board) :-
 	getCell(P, L, I, Board),
 	write(P), nl.
@@ -93,7 +92,6 @@ colocarPecaValido(L, I, Board) :-
 colocarPecaValidoBaixo(L, I, Board) :-
 	%Check if inicial position is empty
 	getCell(P, L, I, Board),
- 
 	verificaListaTemEmpty([P]),
 
 	%Check adjacent positions for at least 1 empty.
