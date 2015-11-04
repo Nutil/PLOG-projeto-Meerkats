@@ -37,16 +37,16 @@ createPecas(4,
 	['R','R','R','R','R','R','R','R','R','R','R','R','R','R','R']
 	]).
 
+
+/**
+ * Metodos auxiliares
+ *
+ */
 verificaListaTemEmpty([]) :- fail.
 verificaListaTemEmpty([H | T]) :-
 	( H == 'e' -> true;
 		!, verificaListaTemEmpty(T) )
 	.
-
-testGetCell(P, L, I) :-
-	createBoard(Board),
-	getCell(P, L, I, Board).
-
 
 getLine(Linha, LIndex, Board) :-
 	nth0(LIndex, Board, Linha).
@@ -63,8 +63,16 @@ getCell(P, L, I, Board) :-
 
 	nth0(L,Board,Linha),
 	nth0(I,Linha, Temp),
-	P = Temp,
-	write(P), nl.
+	P = Temp.
+
+replaceListElement([_|T], 0, NewElement, [NewElement|T]).
+replaceListElement([H|T], Index, NewElement, [H|R]):- 
+	Index > -1,
+	NextIndex is Index-1,
+	replaceListElement(T, Nextindex, NewElement, R), !.
+replaceListElement(List, _, _, List).
+
+
 printCell(L, I, Board) :-
 	getCell(P, L, I, Board),
 	write(P), nl.
@@ -200,9 +208,19 @@ colocarPecaValidoCima(L, I, Board) :-
  *
  */
 
-colocarPeca(P, L, N, Board, BoardAlterada) :-
-	%tenta colocar a peça P no elemento N da linha L da Board. Retorna a Board, alterada ou não.
-	colocarPecaValido(P, L, I, Board).
+testColocarPeca(P, L, I) :-
+
+	createBoard(Board),
+	printBoard(Board), nl, nl, nl,
+	colocarPeca(P, L, I, Board, BoardAlterada),
+	printBoard(BoardAlterada).
+
+colocarPeca(P, L, I, Board, BoardAlterada) :-
+	%tenta colocar a peça P no elemento de índice I da linha L da Board. Retorna a Board, alterada ou não.
+	colocarPecaValido(L, I, Board),
+	getLine(LineToChange, L, Board), % Encontrar a linha a mudar
+	replaceListElement(LineToChange, I, P, ChangedLine), % Criar Linha com elemento mudado
+	replaceListElement(Board, L, ChangedLine, BoardAlterada). %Criar board com linha mudada
 
 
 
@@ -337,8 +355,7 @@ printBoardLine([H | Line]) :-
 	write(' '),
 	printBoardLine(Line).
 
-printBoard :-
-	createBoard(Board),
+printBoard(Board) :-
 	printRow1(Board).
 
 printRow1([H | Rest]) :-
