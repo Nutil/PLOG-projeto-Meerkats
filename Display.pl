@@ -37,6 +37,7 @@ createPecas(4,
 	['R','R','R','R','R','R','R','R','R','R','R','R','R','R','R']
 	]). 
 
+
 /* Clean Console */
 cleanConsole(0).
 cleanConsole(X) :-
@@ -68,14 +69,12 @@ printGameSelectMenu :-
 
 
 
-
-
 /**
- * Display board functions
+ * Display Board functions
  *
  */
 
-printHorizontalLine :- write('+-------------------------------------+'), nl.
+ printHorizontalLine :- write('+-------------------------------------+'), nl.
 
 printBoardLine([]) :- 
 	write('|').
@@ -85,8 +84,7 @@ printBoardLine([H | Line]) :-
 	write(' '),
 	printBoardLine(Line).
 
-printBoard :-
-	createBoard(Board),
+printBoard(Board) :-
 	printRow1(Board).
 
 printRow1([H | Rest]) :-
