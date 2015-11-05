@@ -192,77 +192,70 @@ colocarPeca(P, L, I, Board, BoardAlterada) :-
 	 % este cut nao faz nada mas pronto.
 	replaceCell(P, L, I, Board, BoardAlterada).
 
-testSlidePecaD0(LInit, IInit) :-
+testSlidePeca(LInit, IInit, Direction) :-
 	createBoard(Board),
-	colocarPeca('Y', 0, 0, Board, Board1),
-	colocarPeca('O', 5, 3, Board1, Board2), !,
+	colocarPeca('Y', 1, 2, Board, Board1),
+	colocarPeca('O', 5, 3, Board1, Board2),
 	printBoard(Board2), nl, nl, !, 
-	slidePecaD0(LInit, IInit, Board2, BoardAlterada), !, 
+	slidePeca(LInit, IInit, Direction, Board2, BoardAlterada), 
 	printBoard(BoardAlterada).
 
-slidePecaD0(LInit, IInit, Board, BoardAlterada) :-
-	getCell(P, LInit, IInit, Board), %save current cell in P
-	replaceCell('e', LInit, IInit, Board, BoardAlterada1), % fill it with empty, altered board in BoardAlterada1
-	determineNextIndexInDirection(NextIndex, LInit, IInit, 0), %calc next index in direction
-	NextLine is LInit + 1, % calc next line
+slidePeca(LInit, IInit, Direction, Board, BoardAlterada) :-
+	getCell(P, LInit, IInit, Board),%save current cell in P
+	replaceCell('e', LInit, IInit, Board, BoardAlterada1),% fill it with empty, altered board in BoardAlterada1
+	determineNextIndexInDirection(NextIndex, LInit, IInit, Direction), %calc next index in direction
+	determineNextLineInDirection(NextLine, LInit, IInit, Direction),
+
 	% if the next position is free, place the piece in it and recall function on that piece.
-	( positionIsEmpty(NextLine, NextIndex, BoardAlterada1) -> replaceCell(P, NextLine, NextIndex, BoardAlterada1, BoardAlterada2), slidePecaD0(NextLine, NextIndex, 0, BoardAlterada2, BoardAlterada), !
+	( positionIsEmpty(NextLine, NextIndex, BoardAlterada1) -> replaceCell(P, NextLine, NextIndex, BoardAlterada1, BoardAlterada2), slidePeca(NextLine, NextIndex, Direction, BoardAlterada2, BoardAlterada), !
 		;
-	 replaceCell(P, LInit, IInit, BoardAlterada1, BoardAlterada)). %If the next one isn't free, replace the current cell with the piece again.
-
-
-slidePecaD1(LInit, IInit, 1, Board, BoardAlterada) :-
-	getCell(P, LInit, IInit, Board),
-	replaceCell('e', LInit, IInit, Board, BoardAlterada).
-	%Loop
-
-slidePecaD2(LInit, IInit, 2, Board, BoardAlterada) :-
-	getCell(P, LInit, IInit, Board),
-	replaceCell('e', LInit, IInit, Board, BoardAlterada).
-	%Loop
-
-slidePecaD3(LInit, IInit, 3, Board, BoardAlterada) :-
-	getCell(P, LInit, IInit, Board),
-	replaceCell('e', LInit, IInit, Board, BoardAlterada).
-	%Loop
-
-slidePecaD4(LInit, IInit, 4, Board, BoardAlterada) :-
-	getCell(P, LInit, IInit, Board),
-	replaceCell('e', LInit, IInit, Board, BoardAlterada).
-	%Loop
-
-slidePecaD5(LInit, IInit, 5, Board, BoardAlterada) :-
-	getCell(P, LInit, IInit, Board),
-	replaceCell('e', LInit, IInit, Board, BoardAlterada).
-	%Loop
+	 	replaceCell(P, LInit, IInit, BoardAlterada1, BoardAlterada)). %If the next one isn't free, replace the current cell with the piece again.
 
 /* Calcula o indice do elemento que esta na posicao seguinte, segundo a direcao D, a partir de L|I */
 determineNextIndexInDirection(NewIndex, L, I, D) :-
 
 	I1 is I - 1,
-	I2 is I,
+	I2 is I,	
 	I3 is I + 1,
-	( (D == 0, L >= 4) -> NewIndex1 = I2
+	( (D == 0, L >= 4) -> NewIndex = I2
 		;
-		 (D == 0, L < 4) -> NewIndex1 = I3
+		 (D == 0, L < 4) -> NewIndex = I3
 		;
-		 (D == 1, L >= 4) -> NewIndex1 = I1
+		 (D == 1, L >= 4) -> NewIndex = I1
 		;
-		 (D == 1, L < 4) -> NewIndex1 = I2
+		 (D == 1, L < 4) -> NewIndex = I2
 		;
-		 D == 2 -> NewIndex1 = I1
+		 D == 2 -> NewIndex = I1
 		;
-		 (D == 3, L > 4 ) -> NewIndex1 = I2
+		 (D == 3, L > 4 ) -> NewIndex = I2
 		;
-		 (D == 3, L =< 4 ) -> NewIndex1 = I1
+		 (D == 3, L =< 4 ) -> NewIndex = I1
 		;
-		 (D == 4, L > 4 ) -> NewIndex1 = I3
+		 (D == 4, L > 4 ) -> NewIndex = I3
 		;
-		 (D == 4, L =< 4 ) -> NewIndex1 = I2
+		 (D == 4, L =< 4 ) -> NewIndex = I2
 		;
-		 D == 5 -> NewIndex1 = I3
-		; write('Merda')
-	),
+		 D == 5 -> NewIndex = I3
+		; fail
+	).
 
-	NewIndex = NewIndex1.
+determineNextLineInDirection(NextLine, LInit, IInit, Direction) :-
+	L1 is LInit - 1,
+	L2 is LInit,
+	L3 is LInit + 1,
+	( Direction == 0 -> NextLine = L3 
+		;
+		Direction == 1 -> NextLine = L3
+		;
+		Direction == 2 -> NextLine = L2
+		;
+		Direction == 3 -> NextLine = L1
+		;
+		Direction == 4 -> NextLine = L1
+		;
+		Direction == 5 -> NextLine = L2
+		; fail
+	).
+
+
 
