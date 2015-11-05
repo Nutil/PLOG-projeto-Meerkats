@@ -65,7 +65,8 @@ printGameSelectMenu :-
 	printHorizontalLine,
 	write('1: Player versus Player'),nl,
 	write('2: Player versus AI'),nl,
-	write('3: AI versus AI').
+	write('3: Player versus smart AI'), nl,
+	write('4: AI versus AI'), nl.
 
 
 

@@ -1,10 +1,3 @@
-/**
- * Initialization Methods
- *
- */
-:- use_module(library(lists)).
-
-:- include('Display.pl').
 
 /**
  * Metodos auxiliares
@@ -33,17 +26,28 @@ getCell(P, L, I, Board) :-
 	nth0(I,Linha, Temp),
 	P = Temp.
 
+positionIsEmpty(L, I, Board) :-
+	getCell(P, L, I, Board),
+	verificaListaTemEmpty([P]).
+
 replaceListElement([_|T], 0, NewElement, [NewElement|T]).
 replaceListElement([H|T], Index, NewElement, [H|R]):- 
 	Index > -1,
 	NextIndex is Index-1,
-	replaceListElement(T, Nextindex, NewElement, R), !.
+	replaceListElement(T, NextIndex, NewElement, R), !.
 replaceListElement(List, _, _, List).
+
+replaceCell(P, L, I, Board, BoardAlterada) :-
+	getLine(LineToChange, L, Board), % Encontrar a linha a mudar
+	replaceListElement(LineToChange, I, P, ChangedLine), % Criar Linha com elemento mudado
+	replaceListElement(Board, L, ChangedLine, BoardAlterada). %Criar board com linha mudada
 
 
 printCell(L, I, Board) :-
 	getCell(P, L, I, Board),
 	write(P), nl.
+
+
 
 
 /**
@@ -66,9 +70,8 @@ colocarPecaValido(L, I, Board) :-
 	L < 4, !, colocarPecaValidoCima(L, I, Board).
 
 colocarPecaValidoBaixo(L, I, Board) :-
-	%Check if inicial position is empty
-	getCell(P, L, I, Board),
-	verificaListaTemEmpty([P]),
+	%Check if initial position is empty
+	( positionIsEmpty(L, I, Board) -> true ; fail),
 
 	%Check adjacent positions for at least 1 empty.
 	%Verificar a partir da posicao abaixo à direita, em sentido do ponteiro dos relogios
@@ -103,8 +106,8 @@ colocarPecaValidoBaixo(L, I, Board) :-
 colocarPecaValidoMeio(L, I, Board) :-
 	%Check if inicial position is empty
 	getCell(P, L, I, Board),
- 
-	verificaListaTemEmpty([P]),
+ 	( positionIsEmpty(L, I, Board) -> true ; fail),
+
 
 	%Check adjacent positions for at least 1 empty.
 	%Verificar a partir da posicao abaixo à direita, em sentido do ponteiro dos relogios
@@ -138,9 +141,8 @@ colocarPecaValidoMeio(L, I, Board) :-
 
 colocarPecaValidoCima(L, I, Board) :-
 	%Check if inicial position is empty
-	getCell(P, L, I, Board),
- 
-	verificaListaTemEmpty([P]),
+	( positionIsEmpty(L, I, Board) -> true ; fail),
+
 	%Check adjacent positions for at least 1 empty.
 	%Verificar a partir da posicao abaixo à direita, em sentido do ponteiro dos relogios
 	L1 is L-1,
@@ -184,7 +186,83 @@ testColocarPeca(P, L, I) :-
 
 colocarPeca(P, L, I, Board, BoardAlterada) :-
 	%tenta colocar a peça P no elemento de índice I da linha L da Board. Retorna a Board, alterada ou não.
-	colocarPecaValido(L, I, Board),
-	getLine(LineToChange, L, Board), % Encontrar a linha a mudar
-	replaceListElement(LineToChange, I, P, ChangedLine), % Criar Linha com elemento mudado
-	replaceListElement(Board, L, ChangedLine, BoardAlterada). %Criar board com linha mudada
+	L1 is L,
+	I1 is I,
+	colocarPecaValido(L1, I1, Board),
+	 % este cut nao faz nada mas pronto.
+	replaceCell(P, L, I, Board, BoardAlterada).
+
+testSlidePecaD0(LInit, IInit) :-
+	createBoard(Board),
+	colocarPeca('Y', 0, 0, Board, Board1),
+	colocarPeca('O', 5, 3, Board1, Board2), !,
+	printBoard(Board2), nl, nl, !, 
+	slidePecaD0(LInit, IInit, Board2, BoardAlterada), !, 
+	printBoard(BoardAlterada).
+
+slidePecaD0(LInit, IInit, Board, BoardAlterada) :-
+	getCell(P, LInit, IInit, Board), %save current cell in P
+	replaceCell('e', LInit, IInit, Board, BoardAlterada1), % fill it with empty, altered board in BoardAlterada1
+	determineNextIndexInDirection(NextIndex, LInit, IInit, 0), %calc next index in direction
+	NextLine is LInit + 1, % calc next line
+	% if the next position is free, place the piece in it and recall function on that piece.
+	( positionIsEmpty(NextLine, NextIndex, BoardAlterada1) -> replaceCell(P, NextLine, NextIndex, BoardAlterada1, BoardAlterada2), slidePecaD0(NextLine, NextIndex, 0, BoardAlterada2, BoardAlterada), !
+		;
+	 replaceCell(P, LInit, IInit, BoardAlterada1, BoardAlterada)). %If the next one isn't free, replace the current cell with the piece again.
+
+
+slidePecaD1(LInit, IInit, 1, Board, BoardAlterada) :-
+	getCell(P, LInit, IInit, Board),
+	replaceCell('e', LInit, IInit, Board, BoardAlterada).
+	%Loop
+
+slidePecaD2(LInit, IInit, 2, Board, BoardAlterada) :-
+	getCell(P, LInit, IInit, Board),
+	replaceCell('e', LInit, IInit, Board, BoardAlterada).
+	%Loop
+
+slidePecaD3(LInit, IInit, 3, Board, BoardAlterada) :-
+	getCell(P, LInit, IInit, Board),
+	replaceCell('e', LInit, IInit, Board, BoardAlterada).
+	%Loop
+
+slidePecaD4(LInit, IInit, 4, Board, BoardAlterada) :-
+	getCell(P, LInit, IInit, Board),
+	replaceCell('e', LInit, IInit, Board, BoardAlterada).
+	%Loop
+
+slidePecaD5(LInit, IInit, 5, Board, BoardAlterada) :-
+	getCell(P, LInit, IInit, Board),
+	replaceCell('e', LInit, IInit, Board, BoardAlterada).
+	%Loop
+
+/* Calcula o indice do elemento que esta na posicao seguinte, segundo a direcao D, a partir de L|I */
+determineNextIndexInDirection(NewIndex, L, I, D) :-
+
+	I1 is I - 1,
+	I2 is I,
+	I3 is I + 1,
+	( (D == 0, L >= 4) -> NewIndex1 = I2
+		;
+		 (D == 0, L < 4) -> NewIndex1 = I3
+		;
+		 (D == 1, L >= 4) -> NewIndex1 = I1
+		;
+		 (D == 1, L < 4) -> NewIndex1 = I2
+		;
+		 D == 2 -> NewIndex1 = I1
+		;
+		 (D == 3, L > 4 ) -> NewIndex1 = I2
+		;
+		 (D == 3, L =< 4 ) -> NewIndex1 = I1
+		;
+		 (D == 4, L > 4 ) -> NewIndex1 = I3
+		;
+		 (D == 4, L =< 4 ) -> NewIndex1 = I2
+		;
+		 D == 5 -> NewIndex1 = I3
+		; write('Merda')
+	),
+
+	NewIndex = NewIndex1.
+
