@@ -51,7 +51,8 @@ playGame :-
 		printBoard(Board),
 	playGame(Board, Pecas, NrPlayers, NrPlayers) )
 	;
-	Option == 2 -> write('Exiting'), true ; fail).
+	Option == 2 -> write('Exiting'), true ; 
+	cleanConsole(30), !, playGame).
 
 
 
