@@ -48,7 +48,9 @@ playGame :-
 
 
 playGame(Board, Pecas, MaxPlayers, PreviousPlayer) :-
-	nextPlayer(MaxPlayers, PreviousPlayer, CurrentPlayer),
+	nextPlayer(MaxPlayers, PreviousPlayer, CurrentPlayer), !,
+
+	( gameCannotContinue(0, 0, Board) -> write('Player 1 wins'), fail ; true),
 
 	makeOnePlay(Board, Pecas, BoardAlterada, PecasAlterada),
 	printBoard(BoardAlterada),
@@ -138,3 +140,13 @@ calculatePecaChar(Value, Peca) :-
 
 listIsEmpty(List) :-
 	List == [].
+
+gameCannotContinue(L, I, Board) :-
+	!, ( colocarPecaValido(L, I, Board) -> fail ; true),
+
+	determineNextIndexInDirection(NextIndex, L, I, 5), % direction 5 means go to the right
+	( getCell(UselessVariable, L, NextIndex, Board) -> !, gameCannotContinue(L, NextIndex, Board) %If there's a cell in the next index, that means we can go there :)
+		; %if not, we check if there is a line below us, at the start of the line
+		NextLine is L + 1, getCell(UselessVariable, NextLine, 0, Board) -> !, gameCannotContinue(NextLine, 0, Board)
+		; true).%if there is no line below us and no index to our right, that means we're at the end of the board AND never found a playable position: the game cannot continue.
+		
