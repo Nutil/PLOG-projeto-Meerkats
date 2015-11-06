@@ -40,11 +40,20 @@ createPecas([
 
 
 playGame :-
-	readNumberPlayers(NrPlayers),
-	createBoard(Board),
-	createPecas(Pecas),
-	printBoard(Board),
-	playGame(Board, Pecas, NrPlayers, NrPlayers).
+	printStartMenu,
+	nl,
+	readInt(Option),
+	nl,
+	( Option == 1 -> (
+		readNumberPlayers(NrPlayers),
+		createBoard(Board),	
+		createPecas(Pecas),	
+		printBoard(Board),
+	playGame(Board, Pecas, NrPlayers, NrPlayers) )
+	;
+	Option == 2 -> write('Exiting'), true ; fail).
+
+
 
 
 playGame(Board, Pecas, MaxPlayers, PreviousPlayer) :-
