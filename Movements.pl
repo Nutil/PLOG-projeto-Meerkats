@@ -37,6 +37,8 @@ replaceListElement([H|T], Index, NewElement, [H|R]):-
 	replaceListElement(T, NextIndex, NewElement, R), !.
 replaceListElement(List, _, _, List).
 
+removeListHead([_|Tail], Tail).
+
 replaceCell(P, L, I, Board, BoardAlterada) :-
 	getLine(LineToChange, L, Board), % Encontrar a linha a mudar
 	replaceListElement(LineToChange, I, P, ChangedLine), % Criar Linha com elemento mudado

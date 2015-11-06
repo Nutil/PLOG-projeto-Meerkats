@@ -1,9 +1,36 @@
 
 :- use_module(library(lists)).
-
+:- use_module(library(random)).
 :- include('Display.pl').
 :- include('Movements.pl').
 
+/**
+ * Initialization Methods
+ *
+ */
+
+createBoard(
+	[
+	['e', 'e', 'e', 'e', 'e'],
+	['e', 'e', 'e', 'e', 'e', 'e'],
+	['e', 'e', 'e', 'e', 'e', 'e', 'e'],
+	['e', 'e', 'e', 'e', 'e', 'e', 'e', 'e'],
+	['e', 'e', 'e', 'e', 'e', 'e', 'e', 'e', 'e'],
+	['e', 'e', 'e', 'e', 'e', 'e', 'e', 'e'],
+	['e', 'e', 'e', 'e', 'e', 'e', 'e'],
+	['e', 'e', 'e', 'e', 'e', 'e'],
+	['e', 'e', 'e', 'e', 'e']
+	]
+	).
+
+
+
+createPecas([
+	['B','B','B','B','B','B','B','B','B','B','B','B','B','B','B'],
+	['Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y'],
+	['G','G','G','G','G','G','G','G','G','G','G','G','G','G','G'],
+	['R','R','R','R','R','R','R','R','R','R','R','R','R','R','R']
+	]). 
 
 
 /**
@@ -11,33 +38,46 @@
  *
  */
 
+
 playGame :-
-	getNumberPlayers(NrPlayers),
+	readNumberPlayers(NrPlayers),
 	createBoard(Board),
+	createPecas(Pecas),
 	printBoard(Board),
-	playGame(Board, NrPlayers, NrPlayers).
+	playGame(Board, Pecas, NrPlayers, NrPlayers).
 
 
-playGame(Board, MaxPlayers, PreviousPlayer) :-
+playGame(Board, Pecas, MaxPlayers, PreviousPlayer) :-
 	nextPlayer(MaxPlayers, PreviousPlayer, CurrentPlayer),
-	calculatePeca(CurrentPlayer, Peca),
-	write('E a vez do jogador '),
-	write(CurrentPlayer), nl,
-	makeOnePlay(Board, Peca, BoardAlterada),
-	printBoard(BoardAlterada),
-	playGame(BoardAlterada, MaxPlayers, CurrentPlayer).
 
-testMakeOnePlay :-
-	createBoard(Board),
-	makeOnePlay(Board).
+	makeOnePlay(Board, Pecas, BoardAlterada, PecasAlterada),
+	printBoard(BoardAlterada),
+
+	playGame(BoardAlterada, PecasAlterada, MaxPlayers, CurrentPlayer).
+
 
 %Board Alterada e a board apos todas as jogadas
-makeOnePlay(Board, Peca, BoardAlterada) :-
-	write('Escolha a linha em que quer jogar <0-8>: '),
-	readInt(LineIndex1), nl, 
+makeOnePlay(Board, Pecas, BoardAlterada, PecasAlterada) :-
+	write('Escolha a linha do tabuleiro em que quer jogar <0-8>: '),
+	readInt(BoardLineIndex), nl, 
 	write('Escolha a posicao na linha em que quer jogar: '),
-	readInt(Index1), nl,
-	colocarPeca(Peca, LineIndex1, Index1, Board, BoardAlterada1),
+	readInt(LineElementIndex), nl,
+	
+	calculatePeca(Pecas, Peca, IndexPeca), %Peca = carater, IndexPeca = 0-3, elemento da lista pecas
+	colocarPeca(Peca, BoardLineIndex, LineElementIndex, Board, BoardAlterada1),
+
+	%remover a peca colocada da lista Pecas
+	getLine(PecaLine, IndexPeca, Pecas),
+	write('PecaLine IS this: '),
+	write(PecaLine), nl,  %PecaLine = linha de pecas da qual e para remover uma peca
+	removeListHead(PecaLine, NewPecasLine),
+	write('NewPecasLine is this: '),
+	write(NewPecasLine), nl, 
+	replaceListElement(Pecas, IndexPeca, NewPecasLine, PecasAlterada), nl,
+	write(PecasAlterada), nl,% PecasAlterada = Pecas ja editada
+
+
+
 	printBoard(BoardAlterada1),
 
 	write('Escolha a linha da peca que quer mover <0-8>: '),
@@ -51,7 +91,7 @@ makeOnePlay(Board, Peca, BoardAlterada) :-
 
 
 
-getNumberPlayers(N) :-
+readNumberPlayers(N) :-
 	write('How many players will partake in this round? : '),
 	readInt(N).
 
@@ -64,13 +104,37 @@ nextPlayer(MaxPlayers, CurrentPlayer, NextPlayer) :-
 	NextPlayer1 is CurrentPlayer +1,
 	( NextPlayer1 > MaxPlayers -> NextPlayer = 1 ; NextPlayer = NextPlayer1).
 
-calculatePeca(CurrentPlayer, Peca) :-
-	(CurrentPlayer == 1 -> Peca = 'R'
+
+
+%Calcula a peca a ser jogada, retornando o carater e o indice
+calculatePeca(Pecas, Peca, IndexPeca) :-
+	random(0, 4, Value),
+	calculatePecaValue(Pecas, Value, FinalValue),
+	calculatePecaChar(FinalValue, Peca),
+	IndexPeca = FinalValue.
+
+
+calculatePecaValue(Pecas, InitialValue, FinalValue) :-
+	getLine(LineToCheck, InitialValue, Pecas), %get line in Pecas at index initialvalue
+
+	TempValue is InitialValue + 1, %Assume it's empty
+
+	( TempValue >= 4 -> NextValue = 0 ; NextValue = TempValue), %If the next value to check was >= 4, it means we needa check the first line, if not, all good.
+
+	( listIsEmpty(LineToCheck) -> calculatePecaValue(Pecas, NextValue, FinalValue), write('Skipping...') %if the list is indeed empty, try again with next value,
 		;
-		CurrentPlayer == 2 -> Peca = 'G'
-		;
-		CurrentPlayer == 3 -> Peca = 'B'
-		;
-		CurrentPlayer == 4 -> Peca = 'Y'
-		; fail
-	).
+		FinalValue = InitialValue).  %otherwise the init value was correct
+
+calculatePecaChar(Value, Peca) :-
+
+	(Value == 0 -> Peca = 'R'
+	 ;
+	Value == 1 -> Peca = 'G'
+	;
+	Value == 2 -> Peca = 'B'
+	;
+	Value == 3 -> Peca = 'Y'
+	; fail).
+
+listIsEmpty(List) :-
+	List == [].
