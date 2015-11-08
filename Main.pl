@@ -51,7 +51,9 @@ playGame :-
 		printBoard(Board),
 	playGame(Board, Pecas, NrPlayers, NrPlayers) )
 	;
-	Option == 2 -> write('Exiting'), true ; 
+	Option == 2 -> printSlidingInstructions, cleanConsole(30), !, playGame;
+	Option == 3 -> write('Exiting'), true ; 
+
 	cleanConsole(30), !, playGame).
 
 
@@ -60,12 +62,12 @@ playGame :-
 playGame(Board, Pecas, MaxPlayers, PreviousPlayer) :-
 	nextPlayer(MaxPlayers, PreviousPlayer, CurrentPlayer), !,
 
-	( gameCannotContinue(0, 0, Board) -> write('Player 1 wins'), fail ; true),
+	( gameCannotContinue(0, 0, Board) -> write('Player 1 wins'), fail ; true), !, 
 
-	makeOnePlay(Board, Pecas, BoardAlterada, PecasAlterada),
-	printBoard(BoardAlterada),
+	makeOnePlay(Board, Pecas, BoardAlterada, PecasAlterada), !, 
+	printBoard(BoardAlterada), !, 
 
-	playGame(BoardAlterada, PecasAlterada, MaxPlayers, CurrentPlayer).
+	playGame(BoardAlterada, PecasAlterada, MaxPlayers, CurrentPlayer), !.
 
 
 %Board Alterada e a board apos todas as jogadas
@@ -120,8 +122,16 @@ nextPlayer(MaxPlayers, CurrentPlayer, NextPlayer) :-
 
 %Calcula a peca a ser jogada, retornando o carater e o indice
 calculatePeca(Pecas, Peca, IndexPeca) :-
-	random(0, 4, Value),
+	write('Escolha a peca que quer colocar:'), nl,
+	write('1: (R)ed  2: (G)reen  3: (B)lue  4: (Y)ellow'), nl,
+	readInt(Value1),
+
+	Value is Value1 - 1,
+
 	calculatePecaValue(Pecas, Value, FinalValue),
+
+	(\+ (Value == FinalValue) -> !, calculatePeca(Pecas, Peca, IndexPeca) ; true),
+
 	calculatePecaChar(FinalValue, Peca),
 	IndexPeca = FinalValue.
 

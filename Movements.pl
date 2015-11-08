@@ -106,8 +106,7 @@ colocarPecaValidoBaixo(L, I, Board) :-
 	verificaListaTemEmpty(UpdatedList7).
 
 colocarPecaValidoMeio(L, I, Board) :-
-	%Check if inicial position is empty
-	getCell(P, L, I, Board),
+	%Check if initial position is empty
  	( positionIsEmpty(L, I, Board) -> true ; fail),
 
 
@@ -206,7 +205,7 @@ slidePeca(LInit, IInit, Direction, Board, BoardAlterada) :-
 	getCell(P, LInit, IInit, Board),%save current cell in P
 	replaceCell('e', LInit, IInit, Board, BoardAlterada1),% fill it with empty, altered board in BoardAlterada1
 	determineNextIndexInDirection(NextIndex, LInit, IInit, Direction), %calc next index in direction
-	determineNextLineInDirection(NextLine, LInit, IInit, Direction),
+	determineNextLineInDirection(NextLine, LInit, Direction),
 
 	% if the next position is free, place the piece in it and recall function on that piece.
 	( positionIsEmpty(NextLine, NextIndex, BoardAlterada1) -> replaceCell(P, NextLine, NextIndex, BoardAlterada1, BoardAlterada2), slidePeca(NextLine, NextIndex, Direction, BoardAlterada2, BoardAlterada), !
@@ -241,7 +240,7 @@ determineNextIndexInDirection(NewIndex, L, I, D) :-
 		; fail
 	).
 
-determineNextLineInDirection(NextLine, LInit, IInit, Direction) :-
+determineNextLineInDirection(NextLine, LInit, Direction) :-
 	L1 is LInit - 1,
 	L2 is LInit,
 	L3 is LInit + 1,

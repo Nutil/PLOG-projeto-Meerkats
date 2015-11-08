@@ -10,6 +10,22 @@ cleanConsole(X) :-
  * Display Menu functions
  *
  */
+printSlidingInstructions :-
+	write('How the directions work:'), nl,
+	write('When choosing a direction, you choose a number from 0 to 5, as described in the picture'), nl,
+	write('In the example, choose direction 1 will move the piece in the lower-left direction of the board'), nl,
+
+	write('  +-------+'), nl,
+	write('  | 3 | 4 |'), nl,
+	write('+-----------+'), nl,
+	write('| 2 | P | 5 |'), nl,
+	write('+-----------+'), nl,
+	write('  | 1 | 0 |'), nl,
+	write('  +-------+'), nl, nl,
+
+	write('Press [ENTER] to return to the main menu'), !,
+	get_code(_).
+
 
 printStartMenu :-
 	nl,
@@ -17,7 +33,8 @@ printStartMenu :-
 	write('Choose your option: '), nl,
 	printHorizontalLine,
 	write('1: Start Game'), nl,
-	write('2: Exit').
+	write('2: Read Instructions'), nl,
+	write('3: Exit').
 
 printGameSelectMenu :-
 	nl,
